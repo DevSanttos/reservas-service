@@ -1,0 +1,29 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: reservas-service
+  datasource:
+    url: jdbc:h2:mem:reservasdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: 5672
+    username: guest
+    password: guest
+
+salas:
+  service:
+    url: ${SALAS_SERVICE_URL:http://localhost:8082}
+
+reservas:
+  rabbit:
+    exchange: reservas.exchange
+    routing-key-confirmada: reserva.confirmada
