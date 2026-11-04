@@ -23,7 +23,21 @@ salas:
   service:
     url: ${SALAS_SERVICE_URL:http://localhost:8082}
 
+equipamentos:
+  service:
+    url: ${EQUIPAMENTOS_SERVICE_URL:http://localhost:8085}
+
 reservas:
   rabbit:
     exchange: reservas.exchange
     routing-key-confirmada: reserva.confirmada
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true

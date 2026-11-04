@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ReservaRequest {
 
@@ -18,6 +19,8 @@ public class ReservaRequest {
 
     @NotNull
     private LocalDateTime fim;
+
+    private List<EquipamentoRequest> equipamentos;
 
     public Long getSalaId() {
         return salaId;
@@ -49,5 +52,13 @@ public class ReservaRequest {
 
     public void setFim(LocalDateTime fim) {
         this.fim = fim;
+    }
+
+    public List<EquipamentoRequest> getEquipamentos() {
+        return equipamentos;
+    }
+
+    public void setEquipamentos(List<EquipamentoRequest> equipamentos) {
+        this.equipamentos = equipamentos;
     }
 }

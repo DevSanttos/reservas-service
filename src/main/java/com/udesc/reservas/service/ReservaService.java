@@ -1,8 +1,10 @@
 package com.udesc.reservas.service;
 
+import com.udesc.reservas.client.EquipamentoClient;
 import com.udesc.reservas.client.SalaClient;
 import com.udesc.reservas.dto.ReservaConfirmadaEvent;
 import com.udesc.reservas.dto.ReservaRequest;
+import com.udesc.reservas.exception.EquipamentoIndisponivelException;
 import com.udesc.reservas.exception.ReservaInvalidaException;
 import com.udesc.reservas.exception.SalaIndisponivelException;
 import com.udesc.reservas.messaging.ReservaEventPublisher;
@@ -19,11 +21,14 @@ public class ReservaService {
 
     private final ReservaRepository reservaRepository;
     private final SalaClient salaClient;
+    private final EquipamentoClient equipamentoClient;
     private final ReservaEventPublisher eventPublisher;
 
-    public ReservaService(ReservaRepository reservaRepository, SalaClient salaClient, ReservaEventPublisher eventPublisher) {
+    public ReservaService(ReservaRepository reservaRepository, SalaClient salaClient,
+                          EquipamentoClient equipamentoClient, ReservaEventPublisher eventPublisher) {
         this.reservaRepository = reservaRepository;
         this.salaClient = salaClient;
+        this.equipamentoClient = equipamentoClient;
         this.eventPublisher = eventPublisher;
     }
 
@@ -41,6 +46,17 @@ public class ReservaService {
             throw new SalaIndisponivelException(request.getSalaId());
         }
 
+        if (request.getEquipamentos() != null && !request.getEquipamentos().isEmpty()) {
+            try {
+                equipamentoClient.alocarEquipamentos(reserva.getId(), request.getEquipamentos());
+            } catch (Exception ex) {
+                salaClient.liberarSala(request.getSalaId());
+                reserva.setStatus(StatusReserva.CANCELADA);
+                reservaRepository.save(reserva);
+                throw new EquipamentoIndisponivelException(reserva.getId(), ex);
+            }
+        }
+
         try {
             reserva.setStatus(StatusReserva.CONFIRMADA);
             reserva = reservaRepository.save(reserva);
@@ -48,6 +64,7 @@ public class ReservaService {
             eventPublisher.publicarReservaConfirmada(new ReservaConfirmadaEvent(
                     reserva.getId(), reserva.getSalaId(), reserva.getUsuario(), reserva.getInicio(), reserva.getFim()));
         } catch (Exception ex) {
+            equipamentoClient.liberarEquipamentos(reserva.getId());
             salaClient.liberarSala(request.getSalaId());
             reserva.setStatus(StatusReserva.CANCELADA);
             reservaRepository.save(reserva);

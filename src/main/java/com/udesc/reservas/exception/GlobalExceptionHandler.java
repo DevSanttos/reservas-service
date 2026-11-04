@@ -19,4 +19,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleIndisponivel(SalaIndisponivelException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", ex.getMessage()));
     }
+
+    @ExceptionHandler(EquipamentoIndisponivelException.class)
+    public ResponseEntity<Map<String, String>> handleEquipamentoIndisponivel(EquipamentoIndisponivelException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", ex.getMessage()));
+    }
 }
