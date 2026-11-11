@@ -66,3 +66,20 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/devsanttos/reservas-service:${{ github.ref_name }}
+
+  deploy:
+    name: Deploy no Render (DEV)
+    needs: docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Acionar Deploy Hook do Render
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_DEV }}
+        run: |
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "Erro: URL do Deploy Hook não encontrada nos Secrets."
+            exit 1
+          fi
+          curl --fail --silent --show-error -X POST "$DEPLOY_HOOK"
